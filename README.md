@@ -22,4 +22,4 @@ It returns:
   
   Additionally, almost all columns can be filtered on, letting you look closely at sections of investments at a time!
   
- ![dashboard_screenshot](https://github.com/mathyjokes/Finance_Dashboard/blob/master/dashboard_screenshot_edited.jpg)
+ ![dashboard_screenshot](https://github.com/mathyjokes/Finance_Dashboard/blob/main/dashboard_screenshot_edited.jpg)
