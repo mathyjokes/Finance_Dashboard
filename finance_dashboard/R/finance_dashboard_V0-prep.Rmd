@@ -1,0 +1,226 @@
+<<<<<<< HEAD
+---
+title: "Finance Dashboard"
+output: html_document
+---
+
+Read in packages and get the data ready
+```{r}
+library(tidyverse)
+library(flexdashboard)
+library(readxl)
+library(janitor)
+library(ggthemes)
+library(scales)
+library(directlabels)
+library(highcharter)
+
+money <- read_xlsx('Retirement.xlsx') %>% 
+  clean_names()
+
+money_long <- money %>% 
+  pivot_longer(!c(investments, rate, fee, location, description, shares), names_to = "date", values_to = "value") %>% 
+  mutate(date = str_remove(date, 'x')) %>% 
+  mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>% 
+  mutate(description_simple = str_split(description, "-")) %>% 
+  separate(description, into = "description_simple", remove = F, sep = "-") %>% 
+  mutate(description_simple = trimws(description_simple)) %>% 
+  mutate(value_description = ifelse(value < 10000, "<10k",
+                                    ifelse(value <50000, "10k-50k",
+                                           ifelse(value < 100000, "50k-100k",
+                                                  ">100k"))))
+
+year_sum <- money_long %>% 
+  filter(date == max(date)) %>% 
+  summarize(sum(value, na.rm = T)) %>% 
+  as.numeric()
+
+last_month <- money_long %>% 
+  filter(date == max(date)) %>% 
+  mutate(value_perc = value*100/year_sum)
+
+```
+
+
+Pie chart of investment type by value
+```{r}
+last_month %>% 
+  group_by(description_simple) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= description_simple, y = total_perc)
+  )
+```
+
+
+Pie chart of stocks by value
+```{r}
+last_month %>% 
+  filter(description_simple == "Stock") %>% 
+  group_by(description) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= description, y = total_perc)
+  )
+```
+
+Pie chart of investment by location
+```{r}
+last_month %>% 
+  group_by(location) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= location, y = total_perc)
+  )
+```
+
+Investment value by type over time - bar
+```{r}
+money_long %>% 
+  group_by(date, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+  hchart(
+    type = 'column', 
+    hcaes(x = date, y = sum_value, group = description_simple), stacking = 'normal'
+  )
+```
+
+Investment value by type over time - line
+```{r}
+money_long %>% 
+  group_by(date, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+  hchart(
+    type = 'line', 
+    hcaes(x = date, y = sum_value, group = description_simple)
+  )
+```
+
+
+Investment value per investment over time
+```{r}
+money_long %>% 
+  group_by(date, investments, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+    hchart(
+    type = 'line', 
+    hcaes(x = date, y = sum_value, group = investments)
+  )
+
+=======
+---
+title: "Finance Dashboard"
+output: html_document
+---
+
+Read in packages and get the data ready
+```{r}
+library(tidyverse)
+library(flexdashboard)
+library(readxl)
+library(janitor)
+library(ggthemes)
+library(scales)
+library(directlabels)
+library(highcharter)
+
+money <- read_xlsx('Retirement.xlsx') %>% 
+  clean_names()
+
+money_long <- money %>% 
+  pivot_longer(!c(investments, rate, fee, location, description, shares), names_to = "date", values_to = "value") %>% 
+  mutate(date = str_remove(date, 'x')) %>% 
+  mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>% 
+  mutate(description_simple = str_split(description, "-")) %>% 
+  separate(description, into = "description_simple", remove = F, sep = "-") %>% 
+  mutate(description_simple = trimws(description_simple)) %>% 
+  mutate(value_description = ifelse(value < 10000, "<10k",
+                                    ifelse(value <50000, "10k-50k",
+                                           ifelse(value < 100000, "50k-100k",
+                                                  ">100k"))))
+
+year_sum <- money_long %>% 
+  filter(date == max(date)) %>% 
+  summarize(sum(value, na.rm = T)) %>% 
+  as.numeric()
+
+last_month <- money_long %>% 
+  filter(date == max(date)) %>% 
+  mutate(value_perc = value*100/year_sum)
+
+```
+
+
+Pie chart of investment type by value
+```{r}
+last_month %>% 
+  group_by(description_simple) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= description_simple, y = total_perc)
+  )
+```
+
+
+Pie chart of stocks by value
+```{r}
+last_month %>% 
+  filter(description_simple == "Stock") %>% 
+  group_by(description) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= description, y = total_perc)
+  )
+```
+
+Pie chart of investment by location
+```{r}
+last_month %>% 
+  group_by(location) %>% 
+  summarise(total_perc = sum(value_perc, na.rm = T)) %>% 
+  hchart(
+    type = 'pie', 
+    hcaes(x= location, y = total_perc)
+  )
+```
+
+Investment value by type over time - bar
+```{r}
+money_long %>% 
+  group_by(date, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+  hchart(
+    type = 'column', 
+    hcaes(x = date, y = sum_value, group = description_simple), stacking = 'normal'
+  )
+```
+
+Investment value by type over time - line
+```{r}
+money_long %>% 
+  group_by(date, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+  hchart(
+    type = 'line', 
+    hcaes(x = date, y = sum_value, group = description_simple)
+  )
+```
+
+
+Investment value per investment over time
+```{r}
+money_long %>% 
+  group_by(date, investments, description_simple) %>% 
+  summarise(sum_value = sum(value, na.rm = T)) %>% 
+    hchart(
+    type = 'line', 
+    hcaes(x = date, y = sum_value, group = investments)
+  )
+
+>>>>>>> f6d30883f3aace6b2af634e79bd70de1e3455241
+```
